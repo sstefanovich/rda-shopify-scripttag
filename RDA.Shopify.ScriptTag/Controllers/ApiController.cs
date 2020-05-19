@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using RDA.Shopify.ScriptTag.Models;
 using ShopifySharp;
 using ShopifySharp.Enums;
 using System;
@@ -65,6 +67,22 @@ namespace RDA.Shopify.ScriptTag.Controllers
             var createdTag = await svc.CreateAsync(tag);
 
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("api/settings")]
+        public async Task<ContentResult> LoadSettings([FromQuery] string shop, [FromQuery] string callback)
+        {
+            //This would ultimately load the settings for the shop from a data store
+            string json = JsonConvert.SerializeObject(new ShopSettings()
+            {
+                ShopName = shop,
+                WelcomeMessage = $"Hello {shop}!"
+            });
+
+            string outputScript = string.Format("window['{0}']({1})", callback, json);
+
+            return Content(outputScript, "text/javascript"); 
         }
     }
 }
